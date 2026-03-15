@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: all-templates
+  description: Índice central de todos los templates de la plataforma
+spec:
+  targets:
+    - ./go-http-service/template.yaml
+    # Agregar nuevos templates aquí:
+    # - ./nodejs-service/template.yaml
+    # - ./python-api/template.yaml
