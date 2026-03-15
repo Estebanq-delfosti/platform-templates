@@ -3,10 +3,11 @@ kind: Template
 metadata:
   name: go-backend
   title: Go Backend Service
-  description: Crea un servicio HTTP en Go con Dockerfile y manifests K8s listos para OrbStack
+  description: Servicio HTTP en Go con arquitectura hexagonal, chi router, slog, Docker y pipelines de GitHub Actions
   tags:
     - go
     - kubernetes
+    - hexagonal
 spec:
   owner: group:default/platform-team
   type: service
@@ -23,7 +24,11 @@ spec:
           pattern: '^[a-z][a-z0-9-]*$'
           description: Nombre del repositorio y del servicio
           ui:autofocus: true
-          ui:help: Solo minúsculas, números y guiones. Ej. hello-service
+          ui:help: Solo minúsculas, números y guiones. Ej. payment-service
+        description:
+          title: Descripción
+          type: string
+          description: Descripción breve del propósito del servicio
         port:
           title: Puerto HTTP
           type: integer
@@ -48,8 +53,11 @@ spec:
       action: fetch:template
       input:
         url: ./skeleton
+        copyWithoutRender:
+          - .github/workflows/**
         values:
           name: ${{ parameters.name }}
+          description: ${{ parameters.description }}
           port: ${{ parameters.port }}
           repoUrl: ${{ parameters.repoUrl }}
 
@@ -57,7 +65,7 @@ spec:
       name: Publicar en GitHub
       action: publish:github
       input:
-        description: Servicio HTTP en Go - ${{ parameters.name }}
+        description: ${{ parameters.description or 'Servicio HTTP en Go - ' + parameters.name }}
         repoUrl: ${{ parameters.repoUrl }}
         defaultBranch: main
         repoVisibility: private

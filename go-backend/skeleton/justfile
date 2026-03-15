@@ -1,0 +1,40 @@
+service := "${{ values.name }}"
+port    := "${{ values.port }}"
+image   := service + ":latest"
+
+# Lista todos los comandos disponibles
+default:
+    @just --list
+
+# Ejecutar en modo desarrollo
+run:
+    go run ./...
+
+# Compilar el binario
+build:
+    go build -ldflags="-w -s" -o bin/{{service}} ./...
+
+# Correr tests con race detector
+test:
+    go test ./... -race -cover
+
+# Generar reporte de cobertura HTML
+test-coverage:
+    go test ./... -coverprofile=coverage.out
+    go tool cover -html=coverage.out -o coverage.html
+
+# Linter
+lint:
+    golangci-lint run ./...
+
+# Actualizar dependencias
+tidy:
+    go mod tidy
+
+# Construir imagen Docker
+docker-build:
+    docker build -t {{image}} .
+
+# Correr contenedor Docker localmente
+docker-run:
+    docker run --rm -p {{port}}:{{port}} -e PORT={{port}} {{image}}
