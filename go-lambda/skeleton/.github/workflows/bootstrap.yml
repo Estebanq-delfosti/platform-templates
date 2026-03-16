@@ -87,8 +87,14 @@ jobs:
         run: terraform -chdir=infra validate
 
       - name: Terraform Plan
-        # Save the plan so apply executes exactly the reviewed changes.
-        run: terraform -chdir=infra plan -out=tfplan -input=false
+        # Bootstrap only needs the IAM deploy role and its policy — not the
+        # Lambda function. Using -target avoids reading dist/function.zip,
+        # which does not exist at bootstrap time (no build step runs here).
+        run: |
+          terraform -chdir=infra plan \
+            -target=aws_iam_role.github_deploy \
+            -target=aws_iam_role_policy.github_deploy \
+            -out=tfplan -input=false
 
       - name: Terraform Apply
         # Apply the saved plan — deterministic, no re-evaluation.
