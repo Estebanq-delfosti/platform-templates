@@ -1,52 +1,35 @@
-name: Deploy
+name: Bootstrap
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
   id-token: write
-  contents: write
+  contents: read
 
 jobs:
-  deploy:
-    name: Build & Deploy
+  bootstrap:
+    name: Manual bootstrap fallback
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-          cache: true
-
-      - name: Install just
-        uses: extractions/setup-just@v2
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_wrapper: false
 
-      - name: Configure AWS credentials (OIDC)
+      - name: Configure AWS credentials (platform role)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.AWS_ROLE_ARN || vars.AWS_PLATFORM_ROLE_ARN }}
+          role-to-assume: ${{ vars.AWS_PLATFORM_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
-
-      - name: Build & Package
-        run: just build && just package
 
       - name: Terraform Init
         run: terraform -chdir=infra init
 
-      - name: Terraform Apply
-        run: terraform -chdir=infra apply -auto-approve
-
-      - name: Bootstrap (first run only)
-        if: vars.AWS_ROLE_ARN == ''
+      - name: Save deploy role ARN as repo variable
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

@@ -21,3 +21,14 @@ variable "architecture" {
   type        = string
   default     = "${{ values.architecture }}"
 }
+
+variable "github_repo" {
+  description = "GitHub repository in owner/repo format (used for OIDC trust policy)"
+  type        = string
+  default     = "${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}"
+
+  validation {
+    condition     = can(regex("^[a-z0-9-]+/[a-z0-9-]+$", var.github_repo))
+    error_message = "github_repo must be in owner/repo format using lowercase letters, numbers, and hyphens."
+  }
+}
