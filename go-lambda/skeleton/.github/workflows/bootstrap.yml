@@ -20,6 +20,40 @@ jobs:
     # 20 min is sufficient while preventing indefinitely hung runs.
     timeout-minutes: 20
     steps:
+      - name: Validate required variables
+        run: |
+          ERRORS=0
+
+          AWS_PLATFORM_ROLE_ARN="${{ vars.AWS_PLATFORM_ROLE_ARN }}"
+          if [[ -z "$AWS_PLATFORM_ROLE_ARN" ]]; then
+            echo "::error::AWS_PLATFORM_ROLE_ARN Actions variable is not set."
+            ERRORS=1
+          else
+            ROLE_ARN_PATTERN='^arn:(aws|aws-cn|aws-us-gov):iam::[0-9]{12}:role/[A-Za-z0-9+=,.@_/-]+$'
+            if [[ ! "$AWS_PLATFORM_ROLE_ARN" =~ $ROLE_ARN_PATTERN ]]; then
+              echo "::error::AWS_PLATFORM_ROLE_ARN does not match the expected IAM role ARN format: arn:<partition>:iam::<account-id>:role/<role-name>"
+              ERRORS=1
+            fi
+          fi
+
+          if [[ -z "${{ vars.AWS_REGION }}" ]]; then
+            echo "::error::AWS_REGION Actions variable is not set. Example: us-east-1"
+            ERRORS=1
+          fi
+
+          if [[ -z "${{ vars.TF_BACKEND_BUCKET }}" ]]; then
+            echo "::error::TF_BACKEND_BUCKET Actions variable is not set."
+            ERRORS=1
+          fi
+
+          if [[ -z "${{ vars.TF_BACKEND_REGION }}" ]]; then
+            echo "::error::TF_BACKEND_REGION Actions variable is not set."
+            ERRORS=1
+          fi
+
+          [[ $ERRORS -eq 0 ]] || exit 1
+          echo "All required variables present."
+
       - name: Checkout
         # actions/checkout v4.2.2
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -68,7 +102,7 @@ jobs:
           # Validate the ARN returned by Terraform before storing it as a repo variable.
           ROLE_ARN_PATTERN='^arn:(aws|aws-cn|aws-us-gov):iam::[0-9]{12}:role/[A-Za-z0-9+=,.@_/-]+$'
           if [[ ! "$ROLE_ARN" =~ $ROLE_ARN_PATTERN ]]; then
-            echo "::error::Output github_deploy_role_arn '$ROLE_ARN' is not a valid IAM role ARN."
+            echo "::error::Output github_deploy_role_arn is not a valid IAM role ARN format."
             exit 1
           fi
           gh variable set AWS_ROLE_ARN --body "$ROLE_ARN"
