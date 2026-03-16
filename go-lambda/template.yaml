@@ -75,7 +75,7 @@ spec:
       action: fetch:template
       input:
         url: ./skeleton
-        copyWithoutRender:
+        copyWithoutTemplating:
           - .github/**
         values:
           name: ${{ parameters.name }}

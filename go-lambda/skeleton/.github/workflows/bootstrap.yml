@@ -1,4 +1,4 @@
-name: Bootstrap
+{% raw %}name: Bootstrap
 
 on:
   workflow_dispatch:
@@ -35,3 +35,4 @@ jobs:
         run: |
           ROLE_ARN=$(terraform -chdir=infra output -raw github_deploy_role_arn)
           gh variable set AWS_ROLE_ARN --body "$ROLE_ARN"
+{% endraw %}
