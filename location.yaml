@@ -6,6 +6,7 @@ metadata:
 spec:
   targets:
     - ./go-backend/template.yaml
+    - ./go-lambda/template.yaml
     - ./nodejs-backend/template.yaml
     - ./rust-backend/template.yaml
     - ./react-frontend/template.yaml

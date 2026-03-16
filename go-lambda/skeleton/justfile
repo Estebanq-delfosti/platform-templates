@@ -1,0 +1,36 @@
+name := "${{ values.name }}"
+arch := "${{ values.architecture }}"
+
+default:
+    @just --list
+
+build:
+    mkdir -p dist && GOOS=linux GOARCH={{arch}} CGO_ENABLED=0 go build -tags lambda.norpc -ldflags="-s -w" -o dist/bootstrap ./cmd/handler/
+
+package: build
+    cd dist && zip -q function.zip bootstrap
+
+test:
+    go test ./... -race -cover
+
+test-coverage:
+    go test ./... -coverprofile=coverage.out
+    go tool cover -html=coverage.out -o coverage.html
+
+lint:
+    golangci-lint run ./...
+
+tidy:
+    go mod tidy
+
+tf-init:
+    terraform -chdir=infra init
+
+tf-plan: build package
+    terraform -chdir=infra plan
+
+deploy: build package
+    terraform -chdir=infra apply -auto-approve
+
+destroy:
+    terraform -chdir=infra destroy

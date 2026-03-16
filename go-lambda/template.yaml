@@ -1,39 +1,61 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: go-backend
-  title: Go Backend Service
-  description: Servicio HTTP en Go con arquitectura hexagonal, chi router, slog, Docker y pipelines de GitHub Actions
+  name: go-lambda
+  title: Go Lambda Function
+  description: Función AWS Lambda en Go con arquitectura hexagonal, Terraform (API GW HTTP v2), slog y pipelines de GitHub Actions
   tags:
     - go
-    - kubernetes
+    - aws
+    - lambda
+    - terraform
     - hexagonal
 spec:
   owner: group:default/platform-team
   type: service
 
   parameters:
-    - title: Información del servicio
+    - title: Información de la función
       required:
         - name
-        - port
       properties:
         name:
-          title: Nombre del servicio
+          title: Nombre de la función
           type: string
           pattern: '^[a-z][a-z0-9-]*$'
-          description: Nombre del repositorio y del servicio
+          description: Nombre del repositorio y de la función Lambda
           ui:autofocus: true
-          ui:help: Solo minúsculas, números y guiones. Ej. payment-service
+          ui:help: Solo minúsculas, números y guiones. Ej. payment-processor
         description:
           title: Descripción
           type: string
-          description: Descripción breve del propósito del servicio
-        port:
-          title: Puerto HTTP
-          type: integer
-          default: 8080
-          description: Puerto en el que escuchará el servicio
+          description: Descripción breve del propósito de la función
+        awsRegion:
+          title: Región AWS
+          type: string
+          default: us-east-1
+          enum:
+            - us-east-1
+            - us-west-2
+            - eu-west-1
+            - eu-central-1
+            - ap-southeast-1
+          enumNames:
+            - 'US East (N. Virginia) — us-east-1'
+            - 'US West (Oregon) — us-west-2'
+            - 'Europe (Ireland) — eu-west-1'
+            - 'Europe (Frankfurt) — eu-central-1'
+            - 'Asia Pacific (Singapore) — ap-southeast-1'
+        architecture:
+          title: Arquitectura
+          type: string
+          default: arm64
+          enum:
+            - arm64
+            - amd64
+          enumNames:
+            - 'arm64 (Graviton2 — 20% más barato, recomendado)'
+            - 'amd64 (x86_64)'
 
     - title: Ubicación del repositorio en GitHub
       required:
@@ -58,14 +80,15 @@ spec:
         values:
           name: ${{ parameters.name }}
           description: ${{ parameters.description }}
-          port: ${{ parameters.port }}
+          awsRegion: ${{ parameters.awsRegion }}
+          architecture: ${{ parameters.architecture }}
           repoUrl: ${{ parameters.repoUrl }}
 
     - id: publish
       name: Publicar en GitHub
       action: publish:github
       input:
-        description: ${{ parameters.description or 'Servicio HTTP en Go - ' + parameters.name }}
+        description: ${{ parameters.description or 'Función Lambda en Go — ' + parameters.name }}
         repoUrl: ${{ parameters.repoUrl }}
         defaultBranch: main
         repoVisibility: private
