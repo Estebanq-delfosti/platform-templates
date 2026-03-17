@@ -14,5 +14,8 @@ spec:
     - ./nodejs-library/template.yaml
     - ./rust-library/template.yaml
     - ./client-onboarding/template.yaml
+    - ./client-offboarding/template.yaml
     - ./client-project/template.yaml
     - ./client-service/template.yaml
+    - ./team-onboarding/template.yaml
+    - ./shared-service/template.yaml

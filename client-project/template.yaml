@@ -20,6 +20,7 @@ spec:
         - projectName
         - projectTitle
         - clientRef
+        - domainRef
         - projectType
       properties:
         projectName:
@@ -49,6 +50,16 @@ spec:
             catalogFilter:
               - kind: Group
                 spec.type: client
+        domainRef:
+          title: Dominio de Negocio
+          type: string
+          description: >
+            Dominio de negocio al que pertenece este proyecto (capacidad de negocio).
+            Si no existe aún, créalo primero con el template de onboarding.
+          ui:field: EntityPicker
+          ui:options:
+            catalogFilter:
+              - kind: Domain
         projectType:
           title: Tipo de Proyecto
           type: string
@@ -99,6 +110,7 @@ spec:
           projectTitle: ${{ parameters.projectTitle }}
           projectDescription: ${{ parameters.projectDescription }}
           clientRef: ${{ parameters.clientRef }}
+          domainRef: ${{ parameters.domainRef }}
           projectType: ${{ parameters.projectType }}
           lifecycle: ${{ parameters.lifecycle }}
 

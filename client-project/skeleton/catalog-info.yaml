@@ -11,3 +11,4 @@ metadata:
     lifecycle: ${{ values.lifecycle }}
 spec:
   owner: ${{ values.clientRef }}
+  domain: ${{ values.domainRef }}

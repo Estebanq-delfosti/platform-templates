@@ -1,0 +1,14 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{ values.clientRef | parseEntityRef | pick("name") }}-offboarding-report
+  title: Offboarding Report — ${{ values.clientRef }}
+  description: "Informe de cierre de contrato. Motivo: ${{ values.offboardingReason }}. Fecha: ${{ values.contractEndDate }}. Notas: ${{ values.offboardingNotes }}"
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  labels:
+    offboarding-reason: ${{ values.offboardingReason }}
+spec:
+  type: documentation
+  lifecycle: deprecated
+  owner: group:default/platform-team

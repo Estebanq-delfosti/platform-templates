@@ -1,0 +1,125 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: shared-service
+  title: Nuevo Servicio de Plataforma
+  description: >
+    Crea un nuevo servicio compartido de plataforma, owned por platform-team,
+    dentro de los sistemas de infraestructura compartida.
+  tags:
+    - platform
+    - shared
+    - service
+spec:
+  owner: group:default/platform-team
+  type: service
+
+  parameters:
+    - title: Información del Servicio
+      required:
+        - serviceName
+        - serviceTitle
+        - serviceType
+        - platformSystem
+      properties:
+        serviceName:
+          title: Identificador del Servicio (slug)
+          type: string
+          description: >
+            Identificador único sin espacios ni mayúsculas. Ej: auth-gateway, metrics-collector.
+          pattern: '^[a-z0-9-]+$'
+          ui:autofocus: true
+        serviceTitle:
+          title: Nombre del Servicio
+          type: string
+          description: Nombre descriptivo del servicio de plataforma.
+        serviceDescription:
+          title: Descripción
+          type: string
+          description: Responsabilidad y alcance del servicio.
+          ui:widget: textarea
+          ui:options:
+            rows: 3
+        serviceType:
+          title: Tipo de Componente
+          type: string
+          enum:
+            - service
+            - library
+            - website
+          enumNames:
+            - Servicio (backend API)
+            - Librería (SDK/package)
+            - Website (frontend)
+          default: service
+        platformSystem:
+          title: Sistema de Plataforma
+          type: string
+          description: Sistema al que pertenece este servicio.
+          ui:field: EntityPicker
+          ui:options:
+            catalogFilter:
+              - kind: System
+        lifecycle:
+          title: Ciclo de Vida
+          type: string
+          enum:
+            - experimental
+            - production
+          default: experimental
+          enumNames:
+            - Experimental
+            - Producción
+
+    - title: Repositorio
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Ubicación del Repositorio
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+
+  steps:
+    - id: fetch-template
+      name: Generar estructura del servicio
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          serviceName: ${{ parameters.serviceName }}
+          serviceTitle: ${{ parameters.serviceTitle }}
+          serviceDescription: ${{ parameters.serviceDescription }}
+          serviceType: ${{ parameters.serviceType }}
+          platformSystem: ${{ parameters.platformSystem }}
+          lifecycle: ${{ parameters.lifecycle }}
+          repoOwner: ${{ (parameters.repoUrl | parseRepoUrl).owner }}
+          repoName: ${{ (parameters.repoUrl | parseRepoUrl).repo }}
+
+    - id: publish
+      name: Publicar repositorio en GitHub
+      action: publish:github
+      input:
+        description: "${{ parameters.serviceTitle }} — servicio de plataforma"
+        repoUrl: ${{ parameters.repoUrl }}
+        defaultBranch: main
+        repoVisibility: private
+
+    - id: register
+      name: Registrar en el Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Servicio en el Catalog
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}
+      - title: Repositorio
+        icon: github
+        url: ${{ steps['publish'].output.remoteUrl }}

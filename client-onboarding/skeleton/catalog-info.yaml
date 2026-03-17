@@ -7,6 +7,7 @@ metadata:
   annotations:
     backstage.io/techdocs-ref: dir:.
     clients.backstage.io/account-manager: ${{ values.accountManager }}
+    clients.backstage.io/tier: ${{ values.clientTier }}
     clients.backstage.io/engagement-type: ${{ values.engagementType }}
     clients.backstage.io/region: ${{ values.region }}
   labels:
@@ -20,3 +21,12 @@ spec:
   children: []
   members:
     - ${{ values.accountManager }}
+---
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: ${{ values.clientName }}-${{ values.initialDomainSlug }}
+  title: ${{ values.clientTitle }} — ${{ values.initialDomainTitle }}
+  description: Dominio de negocio inicial para ${{ values.clientTitle }}
+spec:
+  owner: group:default/${{ values.clientName }}

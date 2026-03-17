@@ -1,0 +1,124 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: team-onboarding
+  title: Onboarding de Equipo
+  description: >
+    Registra un nuevo equipo (interno o sub-equipo de cliente) en el portal,
+    crea su espacio de documentación y lo vincula a la jerarquía correcta.
+  tags:
+    - team
+    - onboarding
+    - group
+spec:
+  owner: group:default/platform-team
+  type: documentation
+
+  parameters:
+    - title: Información del Equipo
+      required:
+        - teamName
+        - teamTitle
+        - teamType
+        - parentGroup
+      properties:
+        teamName:
+          title: Identificador del Equipo (slug)
+          type: string
+          description: >
+            Identificador único sin espacios ni mayúsculas. Ej: acme-backend-team, delivery-squad-a.
+          pattern: '^[a-z0-9-]+$'
+          ui:autofocus: true
+        teamTitle:
+          title: Nombre del Equipo
+          type: string
+          description: Nombre descriptivo del equipo.
+        teamType:
+          title: Tipo de Equipo
+          type: string
+          enum:
+            - team
+            - squad
+            - chapter
+          enumNames:
+            - Team (equipo estable)
+            - Squad (equipo ágil)
+            - Chapter (comunidad de práctica)
+          default: team
+        parentGroup:
+          title: Grupo Padre
+          type: string
+          description: Grupo al que pertenece este equipo (cliente o división interna).
+          ui:field: EntityPicker
+          ui:options:
+            catalogFilter:
+              - kind: Group
+        teamDescription:
+          title: Descripción del Equipo
+          type: string
+          description: Misión y responsabilidades del equipo.
+          ui:widget: textarea
+          ui:options:
+            rows: 3
+
+    - title: Repositorio de Documentación
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Ubicación del Repositorio
+          type: string
+          description: Repositorio GitHub para la documentación del equipo.
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+
+  steps:
+    - id: fetch-template
+      name: Generar documentación del equipo
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          teamName: ${{ parameters.teamName }}
+          teamTitle: ${{ parameters.teamTitle }}
+          teamType: ${{ parameters.teamType }}
+          parentGroup: ${{ parameters.parentGroup }}
+          teamDescription: ${{ parameters.teamDescription }}
+
+    - id: publish
+      name: Publicar repositorio en GitHub
+      action: publish:github
+      input:
+        description: "Documentación del equipo: ${{ parameters.teamTitle }}"
+        repoUrl: ${{ parameters.repoUrl }}
+        defaultBranch: main
+        repoVisibility: private
+
+    - id: register
+      name: Registrar equipo en el Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
+
+    - id: notify
+      name: Notificar registro del equipo
+      action: notification:send
+      continueOnError: true
+      input:
+        recipients: broadcast
+        title: "Nuevo equipo registrado: ${{ parameters.teamTitle }}"
+        info: >
+          El equipo ${{ parameters.teamTitle }} ha sido registrado en el portal.
+        severity: normal
+
+  output:
+    links:
+      - title: Equipo en el Catalog
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}
+      - title: Repositorio de Documentación
+        icon: github
+        url: ${{ steps['publish'].output.remoteUrl }}

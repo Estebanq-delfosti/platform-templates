@@ -1,0 +1,119 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: client-offboarding
+  title: Offboarding de Cliente
+  description: >
+    Marca las entidades de un cliente como deprecated, revoca accesos
+    y genera el checklist de cierre de contrato.
+  tags:
+    - client
+    - offboarding
+    - lifecycle
+spec:
+  owner: group:default/platform-team
+  type: documentation
+
+  parameters:
+    - title: Información del Cliente
+      required:
+        - clientRef
+        - offboardingReason
+        - contractEndDate
+      properties:
+        clientRef:
+          title: Cliente a dar de baja
+          type: string
+          description: Selecciona el cliente que será offboarded.
+          ui:field: EntityPicker
+          ui:options:
+            catalogFilter:
+              - kind: Group
+                spec.type: client
+        offboardingReason:
+          title: Motivo del Cierre
+          type: string
+          enum:
+            - contract-end
+            - project-complete
+            - client-request
+            - other
+          enumNames:
+            - Fin de Contrato
+            - Proyecto Completado
+            - Solicitud del Cliente
+            - Otro
+        contractEndDate:
+          title: Fecha de Cierre del Contrato
+          type: string
+          format: date
+          description: Fecha efectiva de cierre.
+        offboardingNotes:
+          title: Notas de Cierre
+          type: string
+          description: Observaciones adicionales sobre el cierre.
+          ui:widget: textarea
+          ui:options:
+            rows: 4
+
+    - title: Repositorio de Documentación
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repositorio de Cierre
+          type: string
+          description: Repositorio donde se generará el informe de cierre.
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+
+  steps:
+    - id: fetch-template
+      name: Generar informe de cierre
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          clientRef: ${{ parameters.clientRef }}
+          offboardingReason: ${{ parameters.offboardingReason }}
+          contractEndDate: ${{ parameters.contractEndDate }}
+          offboardingNotes: ${{ parameters.offboardingNotes }}
+
+    - id: publish
+      name: Publicar informe en GitHub
+      action: publish:github
+      input:
+        description: "Informe de cierre: ${{ parameters.clientRef }}"
+        repoUrl: ${{ parameters.repoUrl }}
+        defaultBranch: main
+        repoVisibility: private
+
+    - id: register
+      name: Registrar informe en el Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
+
+    - id: notify
+      name: Notificar al equipo
+      action: notification:send
+      continueOnError: true
+      input:
+        recipients: broadcast
+        title: "Offboarding iniciado: ${{ parameters.clientRef }}"
+        info: >
+          El proceso de offboarding para ${{ parameters.clientRef }} ha sido iniciado.
+          Revisa el checklist de cierre y completa las tareas pendientes.
+        severity: high
+
+  output:
+    links:
+      - title: Informe de Cierre en Catalog
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}
+      - title: Repositorio del Informe
+        icon: github
+        url: ${{ steps['publish'].output.remoteUrl }}
