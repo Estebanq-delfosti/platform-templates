@@ -123,9 +123,7 @@ spec:
       action: notification:send
       continueOnError: true
       input:
-        recipients: entity
-        entityRefs:
-          - ${{ parameters.clientRef }}
+        recipients: broadcast
         title: "Nuevo proyecto creado: ${{ parameters.projectTitle }}"
         info: >
           El proyecto ${{ parameters.projectTitle }} ha sido creado y registrado en el portal.

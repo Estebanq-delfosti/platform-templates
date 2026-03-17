@@ -1,8 +1,5 @@
-site_name: "${{ values.serviceTitle }}"
-site_description: "Documentación técnica de ${{ values.serviceTitle }}"
-
-nav:
-  - Inicio: index.md
-
+site_name: '${{ values.serviceTitle }}'
 plugins:
   - techdocs-core
+nav:
+  - Home: index.md

@@ -133,9 +133,7 @@ spec:
       action: notification:send
       continueOnError: true
       input:
-        recipients: entity
-        entityRefs:
-          - ${{ parameters.clientRef }}
+        recipients: broadcast
         title: "Nuevo servicio creado: ${{ parameters.serviceTitle }}"
         info: >
           El servicio ${{ parameters.serviceTitle }} ha sido creado dentro del proyecto
