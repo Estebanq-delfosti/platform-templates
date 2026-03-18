@@ -57,19 +57,6 @@ spec:
           description: "Nombre descriptivo del primer dominio de negocio. Ej: Acme Domain"
           default: Main Domain
 
-    - title: Repositorio de Documentación
-      required:
-        - repoUrl
-      properties:
-        repoUrl:
-          title: Ubicación del Repositorio
-          type: string
-          description: Repositorio GitHub donde se almacenará la documentación del cliente.
-          ui:field: RepoUrlPicker
-          ui:options:
-            allowedHosts:
-              - github.com
-
   steps:
     - id: fetch-template
       name: Generar estructura de documentación
@@ -88,7 +75,7 @@ spec:
       action: publish:github
       input:
         description: "Documentación y onboarding: ${{ parameters.clientTitle }}"
-        repoUrl: ${{ parameters.repoUrl }}
+        repoUrl: "github.com?owner=${{ appConfig.scaffolder.githubOrg }}&repo=${{ parameters.clientName }}-docs"
         defaultBranch: main
         repoVisibility: private
 
