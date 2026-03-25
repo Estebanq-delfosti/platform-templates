@@ -8,7 +8,7 @@ metadata:
     - library
     - crate
   annotations:
-    github.com/project-slug: ${{ (values.repoUrl | parseRepoUrl).owner }}/${{ (values.repoUrl | parseRepoUrl).repo }}
+    github.com/project-slug: ${{ values.repoOwner }}/${{ values.name }}
 spec:
   type: library
   lifecycle: experimental

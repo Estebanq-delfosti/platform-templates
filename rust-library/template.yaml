@@ -30,18 +30,6 @@ spec:
           default: ''
           description: Descripción breve del crate
 
-    - title: Ubicación del repositorio en GitHub
-      required:
-        - repoUrl
-      properties:
-        repoUrl:
-          title: Repositorio GitHub
-          type: string
-          ui:field: RepoUrlPicker
-          ui:options:
-            allowedHosts:
-              - github.com
-
   steps:
     - id: fetch
       name: Generar archivos del skeleton
@@ -51,16 +39,18 @@ spec:
         values:
           name: ${{ parameters.name }}
           description: ${{ parameters.description }}
-          repoUrl: ${{ parameters.repoUrl }}
+          repoOwner: ${{ appConfig.scaffolder.githubOrg }}
 
     - id: publish
       name: Publicar en GitHub
-      action: publish:github
+      action: publish:github:configured
       input:
+        repoName: ${{ parameters.name }}
         description: Rust crate - ${{ parameters.name }}
-        repoUrl: ${{ parameters.repoUrl }}
-        defaultBranch: main
-        repoVisibility: private
+        gitCommitMessage: "chore: initial scaffold from rust-library template"
+        topics:
+          - rust
+          - library
 
     - id: register
       name: Registrar en el catálogo

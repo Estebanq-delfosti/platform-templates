@@ -56,19 +56,6 @@ spec:
           ui:options:
             rows: 4
 
-    - title: Repositorio de Documentación
-      required:
-        - repoUrl
-      properties:
-        repoUrl:
-          title: Repositorio de Cierre
-          type: string
-          description: Repositorio donde se generará el informe de cierre.
-          ui:field: RepoUrlPicker
-          ui:options:
-            allowedHosts:
-              - github.com
-
   steps:
     - id: fetch-template
       name: Generar informe de cierre
@@ -83,12 +70,14 @@ spec:
 
     - id: publish
       name: Publicar informe en GitHub
-      action: publish:github
+      action: publish:github:configured
       input:
+        repoName: ${{ parameters.clientRef | replace('group:default/', '') }}-offboarding
         description: "Informe de cierre: ${{ parameters.clientRef }}"
-        repoUrl: ${{ parameters.repoUrl }}
-        defaultBranch: main
-        repoVisibility: private
+        gitCommitMessage: "chore: initial scaffold from client-offboarding template"
+        topics:
+          - client
+          - offboarding
 
     - id: register
       name: Registrar informe en el Catalog

@@ -1,4 +1,4 @@
-module github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}
+module github.com/${{ values.repoOwner }}/${{ values.name }}
 
 go 1.24
 

@@ -3,7 +3,7 @@ package lambdahandler
 import (
 	"time"
 
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/domain"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/domain"
 )
 
 // Request is the JSON payload sent to the Lambda function.

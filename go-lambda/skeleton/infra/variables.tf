@@ -30,7 +30,7 @@ variable "architecture" {
 variable "github_repo" {
   description = "GitHub repository in owner/repo format (used for OIDC trust policy)"
   type        = string
-  default     = "${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}"
+  default     = "${{ values.repoOwner }}/${{ values.name }}"
 
   validation {
     condition     = can(regex("^[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+$", var.github_repo))

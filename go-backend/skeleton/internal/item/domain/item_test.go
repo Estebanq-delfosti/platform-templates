@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/domain"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/domain"
 )
 
 func TestNewName_Valid(t *testing.T) {

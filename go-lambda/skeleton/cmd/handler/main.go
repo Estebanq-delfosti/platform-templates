@@ -10,10 +10,10 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/config"
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/adapter/lambdahandler"
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/adapter/memory"
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/service"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/config"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/adapter/lambdahandler"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/adapter/memory"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/service"
 )
 
 // h is initialised once during the Lambda init phase. Expensive resources

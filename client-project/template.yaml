@@ -86,19 +86,6 @@ spec:
             - Producción
             - Deprecado
 
-    - title: Repositorio del Proyecto
-      required:
-        - repoUrl
-      properties:
-        repoUrl:
-          title: Ubicación del Repositorio
-          type: string
-          description: Repositorio GitHub del proyecto.
-          ui:field: RepoUrlPicker
-          ui:options:
-            allowedHosts:
-              - github.com
-
   steps:
     - id: fetch-template
       name: Generar estructura del proyecto
@@ -116,12 +103,14 @@ spec:
 
     - id: publish
       name: Publicar repositorio en GitHub
-      action: publish:github
+      action: publish:github:configured
       input:
+        repoName: ${{ parameters.projectName }}
         description: "${{ parameters.projectTitle }} — proyecto de ${{ parameters.clientRef }}"
-        repoUrl: ${{ parameters.repoUrl }}
-        defaultBranch: main
-        repoVisibility: private
+        gitCommitMessage: "chore: initial scaffold from client-project template"
+        topics:
+          - client
+          - project
 
     - id: register
       name: Registrar proyecto en el Catalog

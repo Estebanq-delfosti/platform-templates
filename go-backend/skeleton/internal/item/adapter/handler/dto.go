@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/domain"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/domain"
 )
 
 type createItemRequest struct {

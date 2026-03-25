@@ -11,10 +11,10 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/adapter/handler"
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/adapter/memory"
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/service"
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/server"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/adapter/handler"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/adapter/memory"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/service"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/server"
 )
 
 func main() {

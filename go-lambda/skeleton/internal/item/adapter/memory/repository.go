@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/domain"
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/port"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/domain"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/port"
 )
 
 var _ port.ItemRepository = (*Repository)(nil)

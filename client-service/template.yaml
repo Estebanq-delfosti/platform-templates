@@ -83,18 +83,6 @@ spec:
             - Producción
             - Deprecado
 
-    - title: Repositorio
-      required:
-        - repoUrl
-      properties:
-        repoUrl:
-          title: Ubicación del Repositorio
-          type: string
-          ui:field: RepoUrlPicker
-          ui:options:
-            allowedHosts:
-              - github.com
-
   steps:
     - id: fetch-template
       name: Generar estructura del servicio
@@ -109,17 +97,19 @@ spec:
           clientRef: ${{ parameters.clientRef }}
           serviceType: ${{ parameters.serviceType }}
           lifecycle: ${{ parameters.lifecycle }}
-          repoOwner: ${{ (parameters.repoUrl | parseRepoUrl).owner }}
-          repoName: ${{ (parameters.repoUrl | parseRepoUrl).repo }}
+          repoOwner: ${{ appConfig.scaffolder.githubOrg }}
+          repoName: ${{ parameters.serviceName }}
 
     - id: publish
       name: Publicar repositorio en GitHub
-      action: publish:github
+      action: publish:github:configured
       input:
+        repoName: ${{ parameters.serviceName }}
         description: "${{ parameters.serviceTitle }} — parte de ${{ parameters.projectRef }}"
-        repoUrl: ${{ parameters.repoUrl }}
-        defaultBranch: main
-        repoVisibility: private
+        gitCommitMessage: "chore: initial scaffold from client-service template"
+        topics:
+          - client
+          - service
 
     - id: register
       name: Registrar servicio en el Catalog

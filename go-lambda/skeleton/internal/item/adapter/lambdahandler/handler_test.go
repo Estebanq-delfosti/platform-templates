@@ -7,11 +7,11 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambdacontext"
 
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/config"
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/adapter/lambdahandler"
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/adapter/memory"
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/domain"
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/service"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/config"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/adapter/lambdahandler"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/adapter/memory"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/domain"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/service"
 )
 
 type panicService struct{}

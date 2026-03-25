@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/port"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/port"
 )
 
 // Handler is the HTTP driving adapter (primary/driving).

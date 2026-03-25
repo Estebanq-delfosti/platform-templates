@@ -71,18 +71,6 @@ spec:
             - Experimental
             - Producción
 
-    - title: Repositorio
-      required:
-        - repoUrl
-      properties:
-        repoUrl:
-          title: Ubicación del Repositorio
-          type: string
-          ui:field: RepoUrlPicker
-          ui:options:
-            allowedHosts:
-              - github.com
-
   steps:
     - id: fetch-template
       name: Generar estructura del servicio
@@ -96,17 +84,19 @@ spec:
           serviceType: ${{ parameters.serviceType }}
           platformSystem: ${{ parameters.platformSystem }}
           lifecycle: ${{ parameters.lifecycle }}
-          repoOwner: ${{ (parameters.repoUrl | parseRepoUrl).owner }}
-          repoName: ${{ (parameters.repoUrl | parseRepoUrl).repo }}
+          repoOwner: ${{ appConfig.scaffolder.githubOrg }}
+          repoName: ${{ parameters.serviceName }}
 
     - id: publish
       name: Publicar repositorio en GitHub
-      action: publish:github
+      action: publish:github:configured
       input:
+        repoName: ${{ parameters.serviceName }}
         description: "${{ parameters.serviceTitle }} — servicio de plataforma"
-        repoUrl: ${{ parameters.repoUrl }}
-        defaultBranch: main
-        repoVisibility: private
+        gitCommitMessage: "chore: initial scaffold from shared-service template"
+        topics:
+          - platform
+          - service
 
     - id: register
       name: Registrar en el Catalog

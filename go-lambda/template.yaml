@@ -57,18 +57,6 @@ spec:
             - 'arm64 (Graviton2 — 20% más barato, recomendado)'
             - 'amd64 (x86_64)'
 
-    - title: Ubicación del repositorio en GitHub
-      required:
-        - repoUrl
-      properties:
-        repoUrl:
-          title: Repositorio GitHub
-          type: string
-          ui:field: RepoUrlPicker
-          ui:options:
-            allowedHosts:
-              - github.com
-
   steps:
     - id: fetch
       name: Generar archivos del skeleton
@@ -80,16 +68,19 @@ spec:
           description: ${{ parameters.description }}
           awsRegion: ${{ parameters.awsRegion }}
           architecture: ${{ parameters.architecture }}
-          repoUrl: ${{ parameters.repoUrl }}
+          repoOwner: ${{ appConfig.scaffolder.githubOrg }}
 
     - id: publish
       name: Publicar en GitHub
-      action: publish:github
+      action: publish:github:configured
       input:
+        repoName: ${{ parameters.name }}
         description: ${{ parameters.description or 'Función Lambda en Go — ' + parameters.name }}
-        repoUrl: ${{ parameters.repoUrl }}
-        defaultBranch: main
-        repoVisibility: private
+        gitCommitMessage: "chore: initial scaffold from go-lambda template"
+        topics:
+          - go
+          - aws
+          - lambda
 
     - id: register
       name: Registrar en el catálogo

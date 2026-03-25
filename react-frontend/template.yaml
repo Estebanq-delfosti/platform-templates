@@ -25,18 +25,6 @@ spec:
           ui:autofocus: true
           ui:help: Solo minúsculas, números y guiones. Ej. my-app
 
-    - title: Ubicación del repositorio en GitHub
-      required:
-        - repoUrl
-      properties:
-        repoUrl:
-          title: Repositorio GitHub
-          type: string
-          ui:field: RepoUrlPicker
-          ui:options:
-            allowedHosts:
-              - github.com
-
   steps:
     - id: fetch
       name: Generar archivos del skeleton
@@ -45,16 +33,19 @@ spec:
         url: ./skeleton
         values:
           name: ${{ parameters.name }}
-          repoUrl: ${{ parameters.repoUrl }}
+          repoOwner: ${{ appConfig.scaffolder.githubOrg }}
 
     - id: publish
       name: Publicar en GitHub
-      action: publish:github
+      action: publish:github:configured
       input:
+        repoName: ${{ parameters.name }}
         description: React frontend - ${{ parameters.name }}
-        repoUrl: ${{ parameters.repoUrl }}
-        defaultBranch: main
-        repoVisibility: private
+        gitCommitMessage: "chore: initial scaffold from react-frontend template"
+        topics:
+          - react
+          - typescript
+          - frontend
 
     - id: register
       name: Registrar en el catálogo

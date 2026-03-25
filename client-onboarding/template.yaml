@@ -72,12 +72,15 @@ spec:
 
     - id: publish
       name: Publicar repositorio en GitHub
-      action: publish:github
+      action: publish:github:configured
       input:
+        repoName: ${{ parameters.clientName }}-docs
         description: "Documentación y onboarding: ${{ parameters.clientTitle }}"
-        repoUrl: "github.com?owner=${{ appConfig.scaffolder.githubOrg }}&repo=${{ parameters.clientName }}-docs"
-        defaultBranch: main
-        repoVisibility: private
+        gitCommitMessage: "chore: initial scaffold from client-onboarding template"
+        topics:
+          - client
+          - onboarding
+          - documentation
 
     - id: register
       name: Registrar cliente en el Catalog

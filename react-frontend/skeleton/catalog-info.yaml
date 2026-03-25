@@ -8,7 +8,7 @@ metadata:
     - typescript
     - vite
   annotations:
-    github.com/project-slug: ${{ (values.repoUrl | parseRepoUrl).owner }}/${{ (values.repoUrl | parseRepoUrl).repo }}
+    github.com/project-slug: ${{ values.repoOwner }}/${{ values.name }}
 spec:
   type: website
   lifecycle: experimental

@@ -5,9 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/domain"
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/port"
-	"github.com/${{ (values.repoUrl | parseRepoUrl).owner }}/${{ values.name }}/internal/item/service"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/domain"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/port"
+	"github.com/${{ values.repoOwner }}/${{ values.name }}/internal/item/service"
 )
 
 var _ port.ItemRepository = (*stubRepo)(nil)

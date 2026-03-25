@@ -61,19 +61,6 @@ spec:
           ui:options:
             rows: 3
 
-    - title: Repositorio de Documentación
-      required:
-        - repoUrl
-      properties:
-        repoUrl:
-          title: Ubicación del Repositorio
-          type: string
-          description: Repositorio GitHub para la documentación del equipo.
-          ui:field: RepoUrlPicker
-          ui:options:
-            allowedHosts:
-              - github.com
-
   steps:
     - id: fetch-template
       name: Generar documentación del equipo
@@ -89,12 +76,15 @@ spec:
 
     - id: publish
       name: Publicar repositorio en GitHub
-      action: publish:github
+      action: publish:github:configured
       input:
+        repoName: ${{ parameters.teamName }}-docs
         description: "Documentación del equipo: ${{ parameters.teamTitle }}"
-        repoUrl: ${{ parameters.repoUrl }}
-        defaultBranch: main
-        repoVisibility: private
+        gitCommitMessage: "chore: initial scaffold from team-onboarding template"
+        topics:
+          - team
+          - onboarding
+          - documentation
 
     - id: register
       name: Registrar equipo en el Catalog
