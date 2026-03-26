@@ -4,8 +4,8 @@ metadata:
   name: team-onboarding
   title: Onboarding de Equipo
   description: >
-    Registra un nuevo equipo (interno o sub-equipo de cliente) en el portal,
-    crea su espacio de documentación y lo vincula a la jerarquía correcta.
+    Registra un nuevo equipo (interno o sub-equipo de cliente) en el portal
+    y lo vincula a la jerarquía correcta mediante un Pull Request.
   tags:
     - team
     - onboarding
@@ -48,11 +48,14 @@ spec:
         parentGroup:
           title: Grupo Padre
           type: string
-          description: Grupo al que pertenece este equipo (cliente o división interna).
+          description: Cliente o departamento al que pertenece este equipo.
           ui:field: EntityPicker
           ui:options:
             catalogFilter:
               - kind: Group
+                spec.type: client
+              - kind: Group
+                spec.type: department
         teamDescription:
           title: Descripción del Equipo
           type: string
@@ -60,10 +63,29 @@ spec:
           ui:widget: textarea
           ui:options:
             rows: 3
+        teamMembers:
+          title: Miembros Iniciales
+          type: array
+          description: >
+            Consultores que formarán parte de este equipo.
+            Puedes dejarlo vacío y asignarlos después.
+          ui:options:
+            orderable: false
+          items:
+            type: string
+            ui:field: EntityPicker
+            ui:options:
+              catalogFilter:
+                - kind: User
+        teamEmail:
+          title: Email del Equipo
+          type: string
+          format: email
+          description: Email de contacto del equipo (opcional).
 
   steps:
     - id: fetch-template
-      name: Generar documentación del equipo
+      name: Generar definición del equipo
       action: fetch:template
       input:
         url: ./skeleton
@@ -73,25 +95,23 @@ spec:
           teamType: ${{ parameters.teamType }}
           parentGroup: ${{ parameters.parentGroup }}
           teamDescription: ${{ parameters.teamDescription }}
+          teamMembers: ${{ parameters.teamMembers }}
+          teamEmail: ${{ parameters.teamEmail }}
 
-    - id: publish
-      name: Publicar repositorio en GitHub
-      action: publish:github:configured
+    - id: create-pr
+      name: Crear Pull Request en platform-core
+      action: publish:github:pull-request
       input:
-        repoName: ${{ parameters.teamName }}-docs
-        description: "Documentación del equipo: ${{ parameters.teamTitle }}"
-        gitCommitMessage: "chore: initial scaffold from team-onboarding template"
-        topics:
-          - team
-          - onboarding
-          - documentation
+        repoUrl: github.com?owner=Delfosti-Platform&repo=platform-core
+        branchName: team/add-${{ parameters.teamName }}
+        title: "feat: add team ${{ parameters.teamTitle }}"
+        description: |
+          Nuevo equipo registrado via Backstage Scaffolder.
 
-    - id: register
-      name: Registrar equipo en el Catalog
-      action: catalog:register
-      input:
-        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
-        catalogInfoPath: '/catalog-info.yaml'
+          - **Equipo:** ${{ parameters.teamTitle }}
+          - **Tipo:** ${{ parameters.teamType }}
+          - **Grupo padre:** ${{ parameters.parentGroup }}
+        targetPath: clients/_per-client/${{ parameters.parentGroup | replace('group:default/', '') }}/teams
 
     - id: notify
       name: Notificar registro del equipo
@@ -102,13 +122,11 @@ spec:
         title: "Nuevo equipo registrado: ${{ parameters.teamTitle }}"
         info: >
           El equipo ${{ parameters.teamTitle }} ha sido registrado en el portal.
+          PR: ${{ steps['create-pr'].output.remoteUrl }}
         severity: normal
 
   output:
     links:
-      - title: Equipo en el Catalog
-        icon: catalog
-        entityRef: ${{ steps['register'].output.entityRef }}
-      - title: Repositorio de Documentación
+      - title: Pull Request
         icon: github
-        url: ${{ steps['publish'].output.remoteUrl }}
+        url: ${{ steps['create-pr'].output.remoteUrl }}

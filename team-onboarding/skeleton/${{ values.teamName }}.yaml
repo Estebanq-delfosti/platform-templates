@@ -1,0 +1,23 @@
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: ${{ values.teamName }}
+  title: ${{ values.teamTitle }}
+  description: ${{ values.teamDescription }}
+spec:
+  type: ${{ values.teamType }}
+  parent: ${{ values.parentGroup }}
+  profile:
+    displayName: ${{ values.teamTitle }}
+{%- if values.teamEmail %}
+    email: ${{ values.teamEmail }}
+{%- endif %}
+  children: []
+  members:
+{%- if values.teamMembers and values.teamMembers | length > 0 %}
+{%- for member in values.teamMembers %}
+    - ${{ member | replace("user:default/", "") }}
+{%- endfor %}
+{%- else %}
+    []
+{%- endif %}
