@@ -12,19 +12,94 @@ spec:
   type: website
 
   parameters:
+    # ── Paso 1: Información de la aplicación ──────────────────────────────────
     - title: Información de la aplicación
       required:
         - name
       properties:
         name:
-          title: Nombre de la aplicación prueba edicion en vivo
+          title: Nombre de la aplicación
           type: string
           pattern: '^[a-z][a-z0-9-]*$'
           description: Nombre del repositorio y de la aplicación
           ui:autofocus: true
           ui:help: Solo minúsculas, números y guiones. Ej. my-app
 
+    # ── Paso 2: Organización ──────────────────────────────────────────────────
+    - title: Organización
+      required:
+        - githubOrg
+      properties:
+        githubOrg:
+          title: Organización de GitHub
+          type: string
+          description: >
+            Organización donde se creará el repositorio.
+            Solo aparecen organizaciones gestionadas por delfosti-infra.
+          ui:field: SelectFieldFromApi
+          ui:options:
+            path: 'scaffolder/v2/actions/github:org:list'
+            valueSelector: 'orgs[].login'
+            labelSelector: 'orgs[].login'
+
+    # ── Paso 3: Team ──────────────────────────────────────────────────────────
+    - title: Team
+      required:
+        - teamAction
+      properties:
+        teamAction:
+          title: ¿Qué deseas hacer con el team?
+          type: string
+          enum:
+            - existing
+            - new
+          enumNames:
+            - Usar un team existente
+            - Crear un team nuevo
+          default: existing
+
+      dependencies:
+        teamAction:
+          oneOf:
+            # Si elige team existente → muestra dropdown con teams de la org
+            - properties:
+                teamAction:
+                  const: existing
+                existingTeam:
+                  title: Selecciona el team
+                  type: string
+                  description: Teams disponibles en la organización seleccionada
+                  ui:field: SelectFieldFromApi
+                  ui:options:
+                    path: 'scaffolder/v2/actions/github:team:list'
+                    params:
+                      org: '{{ parameters.githubOrg }}'
+                    valueSelector: 'teams[].slug'
+                    labelSelector: 'teams[].name'
+              required:
+                - existingTeam
+
+            # Si elige team nuevo → muestra campos para crearlo
+            - properties:
+                teamAction:
+                  const: new
+                newTeamName:
+                  title: Nombre del nuevo team
+                  type: string
+                  pattern: '^[a-z][a-z0-9-]*$'
+                  description: >
+                    Slug del team a crear. Solo minúsculas, números y guiones.
+                    Ej. acme-frontend
+                  ui:help: Solo minúsculas, números y guiones. Ej. acme-frontend
+                newTeamDescription:
+                  title: Descripción del team
+                  type: string
+                  description: Descripción opcional del team
+              required:
+                - newTeamName
+
   steps:
+    # ── 1. Generar archivos del skeleton ──────────────────────────────────────
     - id: fetch
       name: Generar archivos del skeleton
       action: fetch:template
@@ -32,20 +107,33 @@ spec:
         url: ./skeleton
         values:
           name: ${{ parameters.name }}
-          repoOwner: ${{ appConfig.scaffolder.githubOrg }}
+          repoOwner: ${{ parameters.githubOrg }}
 
+    # ── 2. Publicar repositorio en GitHub ─────────────────────────────────────
     - id: publish
       name: Publicar en GitHub
       action: publish:github:configured
       input:
         repoName: ${{ parameters.name }}
+        org: ${{ parameters.githubOrg }}
         description: Angular frontend - ${{ parameters.name }}
-        gitCommitMessage: "chore: initial scaffold from angular-frontend template"
+        gitCommitMessage: 'chore: initial scaffold from angular-frontend template'
         topics:
           - angular
           - typescript
           - frontend
 
+    # ── 3. Crear o verificar el team y asignar el repo ────────────────────────
+    - id: ensure-team
+      name: Configurar team en GitHub
+      action: github:team:ensure
+      input:
+        org: ${{ parameters.githubOrg }}
+        teamName: ${{ parameters.teamAction === 'new' ? parameters.newTeamName : parameters.existingTeam }}
+        teamDescription: ${{ parameters.newTeamDescription }}
+        repoName: ${{ parameters.name }}
+
+    # ── 4. Registrar en el catálogo de Backstage ──────────────────────────────
     - id: register
       name: Registrar en el catálogo
       action: catalog:register
@@ -57,6 +145,8 @@ spec:
     links:
       - title: Repositorio en GitHub
         url: ${{ steps['publish'].output.remoteUrl }}
+      - title: Team en GitHub
+        url: ${{ steps['ensure-team'].output.teamUrl }}
       - title: Ver en el catálogo
         icon: catalog
         entityRef: ${{ steps['register'].output.entityRef }}
