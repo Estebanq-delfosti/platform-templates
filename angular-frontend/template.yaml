@@ -17,7 +17,7 @@ spec:
         - name
       properties:
         name:
-          title: Nombre de la aplicación
+          title: Nombre de la aplicación prueba edicion en vivo
           type: string
           pattern: '^[a-z][a-z0-9-]*$'
           description: Nombre del repositorio y de la aplicación
