@@ -123,13 +123,24 @@ spec:
           - typescript
           - frontend
 
-    # ── 3. Crear o verificar el team y asignar el repo ────────────────────────
-    - id: ensure-team
-      name: Configurar team en GitHub
+    # ── 3a. Usar team existente ───────────────────────────────────────────────
+    - id: ensure-team-existing
+      name: Asignar repo a team existente
+      if: ${{ parameters.teamAction === 'existing' }}
       action: github:team:ensure
       input:
         org: ${{ parameters.githubOrg }}
-        teamName: ${{ parameters.teamAction === 'new' ? parameters.newTeamName : parameters.existingTeam }}
+        teamName: ${{ parameters.existingTeam }}
+        repoName: ${{ parameters.name }}
+
+    # ── 3b. Crear team nuevo ──────────────────────────────────────────────────
+    - id: ensure-team-new
+      name: Crear team nuevo y asignar repo
+      if: ${{ parameters.teamAction === 'new' }}
+      action: github:team:ensure
+      input:
+        org: ${{ parameters.githubOrg }}
+        teamName: ${{ parameters.newTeamName }}
         teamDescription: ${{ parameters.newTeamDescription }}
         repoName: ${{ parameters.name }}
 
@@ -146,7 +157,7 @@ spec:
       - title: Repositorio en GitHub
         url: ${{ steps['publish'].output.remoteUrl }}
       - title: Team en GitHub
-        url: ${{ steps['ensure-team'].output.teamUrl }}
+        url: ${{ steps['ensure-team-existing'].output.teamUrl }}
       - title: Ver en el catálogo
         icon: catalog
         entityRef: ${{ steps['register'].output.entityRef }}
